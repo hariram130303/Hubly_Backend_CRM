@@ -1,33 +1,28 @@
-// backend/models/Ticket.js
+// models/User.js
 import mongoose from "mongoose";
 
-const ticketSchema = new mongoose.Schema(
-  {
-    ticketId: {
-      type: String,
-      required: true,
-      unique: true, // Example: T-2025-00123
-    },
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName:  { type: String, required: true },
+  email:     { type: String, required: true, unique: true },
+  phone:     { type: String, required: true },   // changed to String
+  password:  { type: String, required: true },
 
-    user: {
-      name:  { type: String, required: true },
-      email: { type: String, required: true },
-      phone: { type: String },
-    },
-
-    // Assigned support agent
-    assignedTo: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "User" 
-    },
-
-    status: {
-      type: String,
-      enum: ["open", "in_progress", "resolved"],
-      default: "open",
-    }
+  // Roles: admin (full access), team (support agent)
+  role: { 
+    type: String, 
+    enum: ["admin", "team"],
+    default: "team"
   },
-  { timestamps: true }
-);
 
-export default mongoose.model("Ticket", ticketSchema);
+  createdAt: { type: Date, default: Date.now }
+});
+
+// Hide password when sending JSON
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
+
+export default mongoose.model("User", userSchema);
