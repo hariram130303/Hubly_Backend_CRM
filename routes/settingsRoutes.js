@@ -1,32 +1,50 @@
-const express = require("express");
-const Setting = require("../models/Setting");
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+import express from "express";
+import Setting from "../models/Setting.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Get current chat bot settings (public for landing page)
+/* ======================================================
+   PUBLIC: FETCH SETTINGS (Shown on landing page + widget)
+====================================================== */
 router.get("/public", async (req, res) => {
-  const cfg = await Setting.findOne();
-  res.json(cfg);
-});
-
-// Admin: get/update
-router.get("/", protect, adminOnly, async (req, res) => {
-  const cfg = await Setting.findOne();
-  res.json(cfg);
-});
-
-router.put("/", protect, adminOnly, async (req, res) => {
-  const data = req.body;
-
-  let cfg = await Setting.findOne();
-  if (!cfg) {
-    cfg = new Setting();
+  try {
+    const cfg = await Setting.findOne();
+    res.json(cfg);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load settings" });
   }
-
-  Object.assign(cfg, data);
-  await cfg.save();
-  res.json(cfg);
 });
 
-module.exports = router;
+/* ======================================================
+   ADMIN: GET SETTINGS
+====================================================== */
+router.get("/", protect, adminOnly, async (req, res) => {
+  try {
+    const cfg = await Setting.findOne();
+    res.json(cfg);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load settings" });
+  }
+});
+
+/* ======================================================
+   ADMIN: UPDATE SETTINGS
+====================================================== */
+router.put("/", protect, adminOnly, async (req, res) => {
+  try {
+    const data = req.body;
+
+    let cfg = await Setting.findOne();
+    if (!cfg) cfg = new Setting();
+
+    Object.assign(cfg, data);
+    await cfg.save();
+
+    res.json(cfg);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update settings" });
+  }
+});
+
+export default router;
