@@ -2,10 +2,19 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// 📌 Helper to generate tokens
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
 // ------------------ SIGNUP ------------------
 export const signup = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, phone, password, role } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -18,16 +27,25 @@ export const signup = async (req, res) => {
       firstName,
       lastName,
       email,
-      password: hashedPassword
+      phone,
+      role: role || "team",
+      password: hashedPassword,
     });
 
-    res.json({ message: "Account created", user });
+    // remove password before sending response
+    const cleanUser = user.toObject();
+    delete cleanUser.password;
+
+    res.json({
+      message: "Account created",
+      user: cleanUser,
+      token: generateToken(user),
+    });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // ------------------ LOGIN ------------------
 export const login = async (req, res) => {
@@ -42,16 +60,13 @@ export const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ message: "Wrong password" });
 
-    // Generate JWT
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      "mysecretkey",
-      { expiresIn: "7d" }
-    );
+    const cleanUser = user.toObject();
+    delete cleanUser.password;
 
     res.json({
       message: "Login successful",
-      token
+      user: cleanUser,
+      token: generateToken(user),
     });
 
   } catch (err) {
