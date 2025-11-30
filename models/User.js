@@ -1,14 +1,12 @@
-// models/User.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  phone:{ type: Number, required: true },
-  password: { type: String, required: true },
-  role: { type: String, default: "team" }, 
-  createdAt: { type: Date, default: Date.now } // admin or team member
+  firstName: String,
+  lastName: String,
+  email: { type: String, unique: true },
+  phone: Number,
+  password: String,
+  role: { type: String, default: "team" }
 });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.models.User || mongoose.model("User", userSchema);
