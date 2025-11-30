@@ -2,16 +2,38 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
-    ticketId: { type: String, required: true },
-    senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    from: { type: String, enum: ["user", "agent"], required: true },
-    text: String,
+    ticketId: { 
+      type: String, 
+      required: true 
+    },
+
+    senderId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User",
+      default: null        // null when sender = user (no account)
+    },
+
+    from: { 
+      type: String, 
+      enum: ["user", "agent"], 
+      required: true 
+    },
+
+    text: { 
+      type: String, 
+      required: true 
+    },
+
     status: {
       type: String,
-      enum: ["sent", "delivered"],   // you can add "read" later
-      default: "delivered",          // since it's already in DB
+      enum: ["sent", "delivered", "read"],
+      default: "sent"
     },
-    timestamp: { type: Date, default: Date.now },
+
+    timestamp: { 
+      type: Date, 
+      default: Date.now 
+    }
   },
   { timestamps: true }
 );
