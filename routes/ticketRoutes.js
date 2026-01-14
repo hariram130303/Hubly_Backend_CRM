@@ -45,11 +45,28 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const tickets = await Ticket.find().sort({ updatedAt: -1 });
-    res.json(tickets);
+
+    const ticketsWithLastMessage = await Promise.all(
+      tickets.map(async (ticket) => {
+        const lastMessage = await Message.findOne({
+          ticketId: ticket.ticketId,
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        return {
+          ...ticket.toObject(),
+          lastMessage: lastMessage ? lastMessage.text : "No messages yet",
+        };
+      })
+    );
+
+    res.json(ticketsWithLastMessage);
   } catch (err) {
     res.status(500).json({ msg: "Error loading tickets" });
   }
 });
+
 
 /* ======================================================
    GET SINGLE TICKET BY ticketId
