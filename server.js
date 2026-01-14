@@ -29,10 +29,11 @@ app.use(express.urlencoded({ extended: true }));
 // ----------------------
 //  ROUTES
 // ----------------------
-app.use("/auth", authRoutes);
-app.use("/tickets", ticketRoutes);
-app.use("/messages", messageRoutes);
-app.use("/settings", settingsRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/settings", settingsRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("✨ Hubly CRM backend is running...");
